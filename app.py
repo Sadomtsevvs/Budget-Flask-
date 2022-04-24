@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 import os
 
@@ -22,15 +22,24 @@ class Expense(db.Model):
 def add():
     return render_template('add.html')
 
+@app.route('/expenses')
+def expenses():
+    expenses = Expense.query.all()
+    return render_template('expenses.html', expenses=expenses)
+
+
 @app.route('/addexpense', methods=['POST'])
 def addexpense():
     date = request.form['date']
     expensename = request.form['expensename']
     amount = request.form['amount']
     category = request.form['category']
-    print(date, expensename, amount, category)
-
-    return redirect('/')
+    # print(date, expensename, amount, category)
+    expense = Expense(
+        date=date, expensename=expensename, amount=amount, category=category)
+    db.session.add(expense)
+    db.session.commit()
+    return redirect('/expenses')
 
 
 if __name__ == '__main__':
