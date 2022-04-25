@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 import os
 
@@ -29,6 +29,10 @@ def delete(id):
     db.session.commit()
     return redirect('/expenses')
 
+@app.route('/updateexpense/<int:id>')
+def updateexpense(id):
+    expense = Expense.query.filter_by(id=id).first()
+    return render_template('updateexpense.html', expense=expense)
 
 @app.route('/expenses')
 def expenses():
