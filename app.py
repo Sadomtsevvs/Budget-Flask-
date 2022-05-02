@@ -55,7 +55,26 @@ def edit():
 @app.route('/expenses')
 def expenses():
     expenses = Expense.query.all()
-    return render_template('expenses.html', expenses=expenses)
+    total = 0
+    t_business = 0
+    t_food = 0
+    t_entertainment = 0
+    t_other = 0
+    for expense in expenses:
+        total += expense.amount
+        if expense.category == 'business':
+            t_business += expense.amount
+        elif expense.category == 'food':
+            t_food += expense.amount
+        elif expense.category == 'entertainment':
+            t_entertainment += expense.amount
+        elif expense.category == 'other':
+            t_other += expense.amount
+        else:
+            raise 'Unknown category'            
+    return render_template('expenses.html', expenses=expenses,
+        total=total, t_business=t_business, t_food=t_food,
+        t_entertainment=t_entertainment, t_other=t_other)
 
 
 @app.route('/addexpense', methods=['POST'])
@@ -69,6 +88,48 @@ def addexpense():
     db.session.add(expense)
     db.session.commit()
     return redirect('/expenses')
+
+
+@app.route('/addview', methods=['GET', 'POST'])
+def addview():
+    if request.method == 'GET':
+        expenses = Expense.query.all()
+        total = 0
+        t_business = 0
+        t_food = 0
+        t_entertainment = 0
+        t_other = 0
+        for expense in expenses:
+            total += expense.amount
+            if expense.category == 'business':
+                t_business += expense.amount
+            elif expense.category == 'food':
+                t_food += expense.amount
+            elif expense.category == 'entertainment':
+                t_entertainment += expense.amount
+            elif expense.category == 'other':
+                t_other += expense.amount
+            else:
+                raise 'Unknown category'
+    elif request.method == 'POST':
+        date = request.form['date']
+        expensename = request.form['expensename']
+        amount = request.form['amount']
+        category = request.form['category']
+        expense = Expense(
+            date=date, expensename=expensename, amount=amount, category=category)
+        db.session.add(expense)
+        db.session.commit()
+        return redirect('/addview ')
+
+    return render_template(
+        'addview.html',
+        expenses=expenses,
+            total=total,
+            t_business=t_business,
+            t_food=t_food,
+            t_entertainment=t_entertainment,
+            t_other=t_other)    
 
 
 if __name__ == '__main__':
